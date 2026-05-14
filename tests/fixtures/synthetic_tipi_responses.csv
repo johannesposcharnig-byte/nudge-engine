@@ -1,0 +1,7 @@
+user_id,ocean_consent,tipi_1,tipi_2,tipi_3,tipi_4,tipi_5,tipi_6,tipi_7,tipi_8,tipi_9,tipi_10,observed_resistance,clicked_new_feature,notes
+u001,true,6,2,6,5,7,2,6,2,5,1,high,false,High self-reported openness but resistant in observed behavior.
+u002,true,2,5,4,2,2,6,3,5,6,6,low,true,Low openness score but tried the new feature.
+u003,false,5,3,5,4,6,3,5,2,4,2,medium,true,Consent missing so psychological scores must not be used.
+u004,true,4,4,3,6,3,4,4,5,3,5,high,false,Neutral traits with fatigue-like resistance.
+u005,true,7,1,7,2,6,1,7,1,6,2,low,false,Strong self-report but no click behavior.
+u006,true,3,6,2,5,2,5,2,6,3,6,medium,true,Lower self-report openness but exploratory behavior appears.

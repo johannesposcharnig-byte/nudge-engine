@@ -1,0 +1,129 @@
+{
+  "title": "Activation Nudge Decision Report",
+  "executive_summary": {
+    "status": "hold",
+    "orchestrator_decision": "hold",
+    "security_status": "approve",
+    "uncertainty_status": "revise",
+    "summary": "Activation analysis is ready for controlled testing, but no production rollout is approved yet.",
+    "decision_rationale": "The report separates testable hypotheses from validated effects. CI contains uncertainty and active rollout remains gated."
+  },
+  "evidence_and_uncertainty": {
+    "uncertainty": {
+      "effect_estimate": 0.12,
+      "ci_lower": -0.02,
+      "ci_upper": 0.24,
+      "ci_method": "bootstrap",
+      "sample_size": 120,
+      "confidence_level": 0.95,
+      "contains_null": true
+    },
+    "gate": {
+      "status": "revise",
+      "summary": "Confidence interval contains the null; effect is not decision-stable.",
+      "significance_claim_allowed": false
+    },
+    "agent_confidence": 0.88,
+    "confidence_note": "Agent confidence is not statistical confidence_level."
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "statement": "Customer data is complete enough for analysis.",
+      "status": "testable",
+      "mece_group": "data_quality"
+    },
+    {
+      "id": "H3",
+      "statement": "High friction and resistance are consistent with a Cognitive Ease intervention.",
+      "status": "testable",
+      "mece_group": "behavioral_mechanism"
+    },
+    {
+      "id": "H4",
+      "statement": "The treatment improves activation.",
+      "status": "not_testable_yet",
+      "mece_group": "effect"
+    }
+  ],
+  "nudge_recommendations": [
+    {
+      "subject_id": "sub_a13f91d2c0",
+      "selected_action": "cognitive_ease",
+      "status": "hypothesis",
+      "claim_type": "hypothesis",
+      "reason_codes": ["high_friction", "reward_beats_no_action"],
+      "baseline_delta": 0.11,
+      "no_action_reward": 0.38
+    },
+    {
+      "subject_id": "sub_b77c42e19a",
+      "selected_action": "no_action",
+      "status": "blocked",
+      "claim_type": "blocked",
+      "reason_codes": ["high_fatigue"],
+      "baseline_delta": 0,
+      "no_action_reward": 0.41
+    },
+    {
+      "subject_id": "sub_d91e5ab003",
+      "selected_action": "no_action",
+      "status": "blocked",
+      "claim_type": "blocked",
+      "reason_codes": ["missing_consent"],
+      "baseline_delta": 0,
+      "no_action_reward": 0.36
+    }
+  ],
+  "segment_view": [
+    {
+      "subject_id": "sub_a13f91d2c0",
+      "recommended_action": "cognitive_ease",
+      "status": "hypothesis",
+      "reason": "high friction"
+    },
+    {
+      "subject_id": "sub_b77c42e19a",
+      "recommended_action": "no_action",
+      "status": "blocked",
+      "reason": "high fatigue"
+    },
+    {
+      "subject_id": "sub_d91e5ab003",
+      "recommended_action": "no_action",
+      "status": "blocked",
+      "reason": "missing consent"
+    }
+  ],
+  "security_and_governance": {
+    "security_review": {
+      "agent": "Leonidas",
+      "security_status": "approve",
+      "risk_level": "low",
+      "safe_to_reason": true,
+      "safe_to_execute": true,
+      "decision_rationale": "Leonidas found no security or integrity blockers."
+    },
+    "pii_redaction_summary": {
+      "redacted_field_count": 2,
+      "records_processed": 120,
+      "vault_records": 120,
+      "key_version": "v1",
+      "pii_removed_from_analytics": true
+    },
+    "no_pii_in_segment_view": true
+  },
+  "open_questions": [
+    "Is the treatment/control assignment randomized?",
+    "Should cognitive_ease be tested as A/B or as guarded rollout?"
+  ],
+  "risks": [
+    "CI contains the null, so effect cannot be claimed as significant.",
+    "Some subjects must remain on no_action due to fatigue or missing consent."
+  ],
+  "next_actions": [
+    "Resolve blockers before any active nudge rollout.",
+    "Run or complete experiment/CI validation before claiming effect.",
+    "Keep no-action baseline and governance review in the decision loop."
+  ]
+}

@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Nudge Engine Dashboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar" aria-label="Dashboard navigation">
+        <div class="brand">
+          <div class="brand-mark">NE</div>
+          <div>
+            <p class="eyebrow">Nudge Engine</p>
+            <h1>Decision OS</h1>
+          </div>
+        </div>
+        <nav class="nav-list">
+          <a href="#analyze" class="active">Analyze</a>
+          <a href="#overview">Results</a>
+          <a href="#evidence">Evidence</a>
+          <a href="#nudges">Nudges</a>
+          <a href="#chat">Chat</a>
+        </nav>
+        <div class="side-card">
+          <span class="dot"></span>
+          <div>
+            <strong>Engine guarded</strong>
+            <p>Security runs in the background before results are shown.</p>
+          </div>
+        </div>
+      </aside>
+
+      <main class="main">
+        <section id="analyze" class="analysis-hero">
+          <div>
+            <p class="eyebrow">Start analysis</p>
+            <h2>Ask a question. Add data. Let the engine work.</h2>
+            <p class="hero-copy">
+              The dashboard is designed as the front door to the Nudge Engine: define the question, upload or paste a report/data payload, then review the result.
+            </p>
+          </div>
+          <form id="analysis-form" class="analysis-card">
+            <label for="analysis-question">Business question</label>
+            <textarea id="analysis-question" rows="4" placeholder="Example: Which low-risk nudge should we test to improve activation?"></textarea>
+            <label for="report-upload">Upload report JSON</label>
+            <input id="report-upload" type="file" accept="application/json,.json" />
+            <button type="submit">Run engine preview</button>
+            <p id="analysis-note" class="muted">Current mode: local preview. Next step: connect this form to the Python engine/API.</p>
+          </form>
+        </section>
+
+        <section class="system-strip" aria-label="Background system checks">
+          <span class="dot"></span>
+          <strong>Background checks:</strong>
+          <span id="system-check-summary">Waiting for report...</span>
+          <button id="toggle-system-details" type="button">Show details</button>
+        </section>
+
+        <section id="system-details" class="panel system-details" hidden>
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Background system checks</p>
+              <h3>Security, privacy and governance audit</h3>
+            </div>
+          </div>
+          <div id="system-list" class="stack"></div>
+        </section>
+
+        <section id="overview" class="hero">
+          <div>
+            <p class="eyebrow">Engine result</p>
+            <h2 id="report-title">Loading report...</h2>
+            <p id="report-summary" class="hero-copy"></p>
+          </div>
+          <div class="status-orb" id="status-orb">
+            <span>status</span>
+            <strong id="overall-status">...</strong>
+          </div>
+        </section>
+
+        <section class="kpi-grid" aria-label="Key report indicators">
+          <article class="kpi-card">
+            <p>Decision</p>
+            <strong id="kpi-decision">...</strong>
+            <span>engine status</span>
+          </article>
+          <article class="kpi-card">
+            <p>Uncertainty</p>
+            <strong id="kpi-uncertainty">...</strong>
+            <span id="kpi-ci-note">CI gate</span>
+          </article>
+          <article class="kpi-card">
+            <p>Significance</p>
+            <strong id="kpi-significance">...</strong>
+            <span>95% standard</span>
+          </article>
+          <article class="kpi-card">
+            <p>Nudges</p>
+            <strong id="kpi-nudges">...</strong>
+            <span>active hypotheses</span>
+          </article>
+        </section>
+
+        <section class="content-grid">
+          <article id="evidence" class="panel wide">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Evidence & confidence</p>
+                <h3>Effect stability</h3>
+              </div>
+              <span class="pill" id="ci-pill">CI</span>
+            </div>
+            <div class="ci-rail">
+              <div class="ci-axis">
+                <span id="ci-lower">-</span>
+                <span>0</span>
+                <span id="ci-upper">-</span>
+              </div>
+              <div class="ci-track">
+                <div class="ci-band" id="ci-band"></div>
+                <div class="ci-null"></div>
+                <div class="ci-estimate" id="ci-estimate"></div>
+              </div>
+            </div>
+            <p id="ci-summary" class="muted"></p>
+          </article>
+
+          <article class="panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Hypotheses</p>
+                <h3>MECE checks</h3>
+              </div>
+            </div>
+            <div id="hypothesis-list" class="stack"></div>
+          </article>
+        </section>
+
+        <section id="nudges" class="panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Nudge recommendations</p>
+              <h3>Actions by subject</h3>
+            </div>
+            <button class="ghost-button" id="toggle-blocked">Show blockers</button>
+          </div>
+          <div class="table-wrap">
+            <table>
+              <thead>
+                <tr>
+                  <th>Subject</th>
+                  <th>Action</th>
+                  <th>Status</th>
+                  <th>Reason</th>
+                  <th>Delta</th>
+                  <th>No-action</th>
+                </tr>
+              </thead>
+              <tbody id="nudge-table"></tbody>
+            </table>
+          </div>
+        </section>
+
+        <section class="content-grid single-chat">
+          <article id="chat" class="panel chat-panel">
+            <div class="panel-header">
+              <div>
+                <p class="eyebrow">Explore results</p>
+                <h3>Chat with this analysis</h3>
+              </div>
+              <span class="pill soft">local preview</span>
+            </div>
+            <div id="chat-log" class="chat-log" aria-live="polite"></div>
+            <form id="chat-form" class="chat-form">
+              <input id="chat-input" type="text" placeholder="Ask: Which nudge should we test first?" autocomplete="off" />
+              <button type="submit">Ask</button>
+            </form>
+          </article>
+        </section>
+
+        <section class="panel next-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Next actions</p>
+              <h3>What should happen next</h3>
+            </div>
+          </div>
+          <ol id="next-actions"></ol>
+        </section>
+      </main>
+    </div>
+    <script src="./app.js"></script>
+  </body>
+</html>

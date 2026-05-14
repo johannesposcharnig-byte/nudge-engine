@@ -1,0 +1,45 @@
+# macOS
+.DS_Store
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+
+# Local environments
+.env
+.env.*
+!.env.example
+.venv/
+venv/
+env/
+
+# Local runtime outputs
+logs/
+tmp/
+*.log
+*.sqlite
+*.db
+
+# Sensitive data boundaries
+vault/
+pii/
+customer_data/
+raw_data/
+exports/private/
+*_vault.json
+*_pii.json
+*_raw_customers.*
+
+# Generated local reports
+reports/local/
+dashboard/data/local-*.json
+
+# IDE
+.idea/
+.vscode/
