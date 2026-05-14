@@ -57,6 +57,7 @@ class AnalysisServiceTests(unittest.TestCase):
         self.assertIn("nudge_recommendations", report)
         self.assertIn("evidence_and_uncertainty", report)
         self.assertIn("result_quality", report)
+        self.assertIn("audit_lineage", report)
         self.assertNotIn("user0@example.com", as_text)
         self.assertNotIn('"user_id"', as_text)
         self.assertTrue(report["security_and_governance"]["no_pii_in_segment_view"])
@@ -70,6 +71,8 @@ class AnalysisServiceTests(unittest.TestCase):
             report["evidence_and_uncertainty"]["uncertainty"].get("confidence_level"),
             {0.95, 0.9},
         )
+        self.assertFalse(report["audit_lineage"]["stored_raw_rows"])
+        self.assertEqual(report["audit_lineage"]["input_row_count"], len(self.valid_rows()))
 
     def test_prompt_injection_in_customer_rows_blocks_before_reasoning(self) -> None:
         rows = self.valid_rows()

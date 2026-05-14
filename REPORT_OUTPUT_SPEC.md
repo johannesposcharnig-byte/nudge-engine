@@ -27,10 +27,12 @@ The report can consume:
 - Hypotheses
 - Formula uncertainty fields
 - Policy decisions and reward rankings
-- Leonidas security review
+- Security & Integrity Gate review
 - PII Vault redaction summary
 - Segment rows using `subject_id`
 - Next actions
+- Result Quality object
+- Audit Lineage object
 
 ## Hard Reporting Rules
 
@@ -43,6 +45,9 @@ The report can consume:
 - If uncertainty is missing, report status must be `hold`.
 - If CI contains null, uncertainty status must be `revise`.
 - Security and governance status must be retained in JSON and available on request, but not dominate the default human report.
+- Policy output must separate `action_fit` from `effect_evidence`.
+- Reports must not imply that a ranked action has proven effect unless the Evidence/Claim Permission Layer allows that wording.
+- Audit lineage must not store raw rows.
 
 ## Report Sections
 
@@ -98,13 +103,17 @@ Contains:
 - selected action
 - status
 - claim type
+- action fit status and fit score
+- effect evidence status
+- intervention risk tier
+- human review requirement
 - reason codes
 - baseline delta
 - no-action reward
 
 Purpose:
 
-- Show what would be recommended, blocked or held per subject.
+- Show what would be recommended, blocked or held per subject without confusing theoretical fit with measured effect.
 
 ### 5. Segment View
 
@@ -124,7 +133,7 @@ Purpose:
 
 Contains:
 
-- Leonidas security status
+- Security & Integrity Gate status
 - risk level
 - safe to reason
 - safe to execute
@@ -141,7 +150,39 @@ Default Markdown behavior:
 - Available through `include_system_checks=true`.
 - Always retained in the JSON-compatible report.
 
-### 7. Next Actions
+### 7. Result Quality
+
+Contains:
+
+- formal decision state
+- data readiness
+- claim permission
+- pilot readiness
+- trust warnings
+
+Purpose:
+
+- Prevent the dashboard or report from over-presenting weak evidence as pilot-ready output.
+
+### 8. Audit Lineage
+
+Contains:
+
+- run ID
+- engine, policy and report versions
+- schema hash
+- input row count
+- decision state
+- blockers
+- security status
+- human override status
+- raw-row persistence flag
+
+Purpose:
+
+- Make every run reproducible and auditable without storing raw customer rows.
+
+### 9. Next Actions
 
 Contains:
 
@@ -181,5 +222,8 @@ Tests:
 - Missing uncertainty produces `hold`.
 - CI containing null blocks significance claims.
 - Policy recommendations include no-action context.
+- Policy recommendations include `action_fit` and `effect_evidence`.
 - Security and PII status are retained in JSON and visible only in optional system checks.
+- Result Quality is retained in JSON and visible in the dashboard.
+- Audit Lineage is retained in JSON and does not store raw rows.
 - Full test suite remains green.

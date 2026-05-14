@@ -4,6 +4,8 @@ const state = {
   lastQuestion: "",
 };
 
+const API_ENDPOINT = "http://127.0.0.1:8765/analyze";
+
 const fallbackReport = {
   title: "Nudge Engine Decision Report",
   executive_summary: {
@@ -28,6 +30,14 @@ const fallbackReport = {
     pii_redaction_summary: {},
     no_pii_in_segment_view: false,
   },
+  result_quality: {
+    pilot_readiness: "not_ready",
+    decision_state: { state: "not_started", blockers: [] },
+    data_readiness: { status: "hold", score: 0 },
+    claim_permission: { evidence_level: "unknown", causal_claim_allowed: false },
+    trust_warnings: ["missing_report_data"],
+  },
+  audit_lineage: {},
   next_actions: ["Load a report JSON payload."],
 };
 
@@ -92,6 +102,7 @@ function renderDashboard() {
   renderHypotheses(report.hypotheses || []);
   renderNudges(report.nudge_recommendations || []);
   renderSystemChecks(securityReview, security.pii_redaction_summary || {}, security.no_pii_in_segment_view);
+  renderResultQuality(report.result_quality || {}, report.audit_lineage || {});
   renderNextActions(report.next_actions || []);
 }
 
@@ -152,6 +163,9 @@ function renderNudges(items) {
       <td>${escapeHtml(item.subject_id || "-")}</td>
       <td>${escapeHtml(item.selected_action || "no_action")}</td>
       <td><span class="status ${statusClass(item.status)}">${escapeHtml(item.status || "unknown")}</span></td>
+      <td>${escapeHtml(item.effect_evidence || item.claim_type || "-")}</td>
+      <td>${escapeHtml(item.risk_tier || item.action_fit?.risk_tier || "-")}</td>
+      <td>${item.human_review_required ? "required" : "not required"}</td>
       <td>${escapeHtml((item.reason_codes || []).join(", ") || "-")}</td>
       <td>${escapeHtml(formatValue(item.baseline_delta))}</td>
       <td>${escapeHtml(formatValue(item.no_action_reward))}</td>
@@ -183,6 +197,36 @@ function renderSystemChecks(review, piiSummary, noPii) {
     .join("");
 }
 
+function renderResultQuality(quality, auditLineage) {
+  const decisionState = quality.decision_state || {};
+  const dataReadiness = quality.data_readiness || {};
+  const claimPermission = quality.claim_permission || {};
+  const warnings = quality.trust_warnings || [];
+
+  text("quality-state", decisionState.state || "unknown");
+  text("quality-data", `${dataReadiness.status || "unknown"} · ${formatValue(dataReadiness.score, "0")}`);
+  text("quality-evidence", claimPermission.evidence_level || "unknown");
+  text("quality-causal", claimPermission.causal_claim_allowed ? "allowed" : "blocked");
+  text("quality-pill", quality.pilot_readiness || "not_ready");
+
+  const warningsContainer = $("quality-warnings");
+  warningsContainer.innerHTML = warnings.length
+    ? warnings.map((warning) => `<div class="warning-item">${escapeHtml(warning)}</div>`).join("")
+    : '<div class="warning-item ok">No trust warnings in loaded report.</div>';
+
+  const auditItems = [
+    ["Run", auditLineage.run_id],
+    ["Decision", auditLineage.decision_state],
+    ["Schema", auditLineage.input_schema_hash],
+    ["Rows", auditLineage.input_row_count],
+    ["Raw rows stored", auditLineage.stored_raw_rows],
+  ];
+  $("audit-lineage").innerHTML = auditItems
+    .filter(([, value]) => value !== undefined && value !== null && value !== "")
+    .map(([label, value]) => `<div class="warning-item"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(formatValue(value))}</div>`)
+    .join("") || '<div class="warning-item">Audit lineage not available in this report.</div>';
+}
+
 function renderNextActions(actions) {
   const list = $("next-actions");
   list.innerHTML = "";
@@ -191,6 +235,34 @@ function renderNextActions(actions) {
     li.textContent = action;
     list.appendChild(li);
   });
+}
+
+function looksLikeEngineInput(payload) {
+  return payload && Array.isArray(payload.customer_rows);
+}
+
+function looksLikeDecisionReport(payload) {
+  return payload && payload.executive_summary && payload.evidence_and_uncertainty;
+}
+
+async function runEngineApi(payload, question) {
+  const body = {
+    question: question || payload.question || "Analyze activation and recommend safe next steps.",
+    customer_rows: payload.customer_rows,
+    config: payload.config || {},
+    identity_fields: payload.identity_fields,
+    confidence_level: payload.confidence_level,
+  };
+  const response = await fetch(API_ENDPOINT, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+  const result = await response.json();
+  if (!response.ok) {
+    throw new Error(result?.error?.message || `Engine API failed with ${response.status}`);
+  }
+  return result;
 }
 
 function seedChat() {
@@ -221,6 +293,11 @@ function answerQuestion(question) {
   }
   if (normalized.includes("ci") || normalized.includes("confidence") || normalized.includes("significant")) {
     return `CI gate is ${gate.status}. Significance allowed: ${gate.significance_claim_allowed ? "yes" : "no"}. ${gate.summary || ""}`;
+  }
+  if (normalized.includes("quality") || normalized.includes("pilot") || normalized.includes("readiness")) {
+    const quality = report.result_quality || {};
+    const decisionState = quality.decision_state || {};
+    return `Pilot readiness is ${quality.pilot_readiness || "unknown"}. Decision state is ${decisionState.state || "unknown"}. Trust warnings: ${(quality.trust_warnings || []).join(", ") || "none"}.`;
   }
   if (normalized.includes("security") || normalized.includes("integrity") || normalized.includes("leonidas")) {
     return `Background security and integrity checks are ${review.security_status || "unknown"} with risk level ${review.risk_level || "unknown"}. This is an internal gate, not a product-facing recommendation agent.`;
@@ -271,15 +348,24 @@ $("analysis-form").addEventListener("submit", async (event) => {
 
   if (file) {
     try {
-      const text = await file.text();
-      state.report = JSON.parse(text);
-      text("analysis-note", "Uploaded report loaded. Engine/API connection is the next implementation step.");
+      const raw = await file.text();
+      const payload = JSON.parse(raw);
+      if (looksLikeEngineInput(payload)) {
+        text("analysis-note", "Running local engine API...");
+        state.report = await runEngineApi(payload, question);
+        text("analysis-note", "Local engine API result loaded. Review Result Quality before using any recommendation.");
+      } else if (looksLikeDecisionReport(payload)) {
+        state.report = payload;
+        text("analysis-note", "Uploaded decision report loaded.");
+      } else {
+        text("analysis-note", "JSON parsed, but it is neither customer_rows input nor a decision report.");
+      }
     } catch (error) {
-      text("analysis-note", "Could not parse uploaded JSON. Keeping current report.");
+      text("analysis-note", `Could not run analysis: ${error.message}. Keeping current report.`);
       console.warn(error);
     }
   } else {
-    text("analysis-note", "Preview run complete using sample report. Next step: connect this form to the Python engine/API.");
+    text("analysis-note", "Preview run complete using sample report. Upload customer_rows JSON to call the local API.");
   }
 
   renderDashboard();

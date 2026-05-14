@@ -11,6 +11,7 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .agents.base import AgentMessage
+from .audit_lineage import build_audit_lineage
 from .claim_permissions import evaluate_claim_permission
 from .data_contracts import evaluate_activation_data_contract
 from .evidence import (
@@ -162,6 +163,13 @@ def run_analysis(request: AnalysisRequest | dict[str, Any]) -> dict[str, Any]:
         policy_decisions=policy_decisions,
         human_approved=bool(parsed.config.get("human_approved")),
     ).as_dict()
+    audit_lineage = build_audit_lineage(
+        rows=analytics_rows,
+        data_readiness=data_readiness,
+        result_quality=result_quality,
+        security_review=analytics_security.as_dict(),
+        human_override_status="approved" if parsed.config.get("human_approved") else "none",
+    )
     next_actions = _next_actions(final_result, uncertainty, policy_decisions)
     return build_decision_report(
         DecisionReportInput(
@@ -175,6 +183,7 @@ def run_analysis(request: AnalysisRequest | dict[str, Any]) -> dict[str, Any]:
             segment_rows=_segment_rows(analytics_rows),
             next_actions=next_actions,
             result_quality=result_quality,
+            audit_lineage=audit_lineage,
         )
     )
 

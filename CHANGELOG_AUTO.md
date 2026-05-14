@@ -193,3 +193,55 @@ DASHBOARD_UX_SPEC.md              |  7 +++-
  tests/test_behavioral_methods.py  | 25 ++++++++++++++
  9 files changed, 153 insertions(+), 6 deletions(-)
 ```
+
+## 2026-05-14T17:11:01+00:00
+
+- Test status: `tests_passed`
+- Latest commit: `e44de13 architecture control: decision states, claim permissions and risk tiering`
+- Note: Safe checkpoint generated before push.
+
+### Changed Files
+
+- `M FEATURE_CONTROL_MATRIX.md`
+- `M README.md`
+- `M REPORT_OUTPUT_SPEC.md`
+- `M VALIDATION_ACCEPTANCE.md`
+- `M dashboard/app.js`
+- `M dashboard/data/sample-report.json`
+- `M dashboard/index.html`
+- `M dashboard/styles.css`
+- `M src/analysis_service.py`
+- `M src/data_contracts.py`
+- `M src/reporting.py`
+- `M tests/test_analysis_service.py`
+- `M tests/test_dashboard_assets.py`
+- `M tests/test_reporting.py`
+- `?? LOCAL_API_TESTING.md`
+- `?? docs/`
+- `?? scripts/smoke_test_api.py`
+- `?? src/api.py`
+- `?? src/audit_lineage.py`
+- `?? tests/fixtures/api_activation_payload.json`
+- `?? tests/test_api.py`
+- `?? tests/test_audit_lineage.py`
+- `?? tests/test_data_contracts.py`
+
+### Diff Stat
+
+```text
+FEATURE_CONTROL_MATRIX.md         |  18 ++-
+ README.md                         | 320 ++++++++++++++++++++------------------
+ REPORT_OUTPUT_SPEC.md             |  52 ++++++-
+ VALIDATION_ACCEPTANCE.md          |  10 ++
+ dashboard/app.js                  |  96 +++++++++++-
+ dashboard/data/sample-report.json |  73 +++++++++
+ dashboard/index.html              |  44 +++++-
+ dashboard/styles.css              |  68 +++++++-
+ src/analysis_service.py           |   9 ++
+ src/data_contracts.py             | 187 +++++++++++++++++++++-
+ src/reporting.py                  |  38 ++++-
+ tests/test_analysis_service.py    |   3 +
+ tests/test_dashboard_assets.py    |  16 ++
+ tests/test_reporting.py           |   3 +
+ 14 files changed, 760 insertions(+), 177 deletions(-)
+```

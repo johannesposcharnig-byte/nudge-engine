@@ -33,6 +33,11 @@ This document defines when the Nudge Engine formula and agent workflow is accept
 - Reports must not expose direct PII, vault payloads or raw identifier field names.
 - Reports must separate agent confidence from statistical `confidence_level`.
 - Reports must not allow significance claims unless required CI fields are complete, the CI excludes the null and `confidence_level >= 0.95`.
+- Reports must separate `action_fit` from `effect_evidence` so action ranking is never confused with measured impact.
+- Dashboard result views must show Result Quality, Pilot Readiness, Decision State, Trust Warnings and Audit Lineage when available.
+- Audit lineage must include run metadata, schema hash, versions and blockers without storing raw customer rows.
+- Local API `/analyze` must return structured JSON reports or structured JSON errors without raw tracebacks.
+- Dashboard live mode must call local API only for `customer_rows` payloads and still support uploaded Decision Reports.
 - Leonidas must hold data with duplicate unique event IDs, invalid timestamps, label leakage fields or treatment/control contamination.
 - Stale governance-critical sources must produce `hold`.
 - Weak or draft evidence must not silently override approved high evidence.
@@ -109,6 +114,11 @@ Expected result:
 - policy ranking includes no-action and all available actions
 - policy ranking keeps blocked actions visible with reason codes
 - selected active actions remain `hypothesis` until validated with real outcome data
+- report recommendations expose action fit, effect evidence, intervention risk tier and human review requirement
+- dashboard assets expose Result Quality and Audit Lineage sections
+- local API returns guarded reports and structured validation errors
+- activation data contract reports row count, field profiles, treatment balance, outcome profile and readiness warnings
+- audit lineage stores run metadata without raw rows
 - behavioral method registry contains all runtime actions and meta methods
 - every behavioral method has required signals, mechanism, manipulation risk and claim type
 - unknown behavioral methods are blocked

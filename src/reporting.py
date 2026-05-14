@@ -49,6 +49,7 @@ class DecisionReportInput:
     segment_rows: list[dict[str, Any]] = field(default_factory=list)
     next_actions: list[str] = field(default_factory=list)
     result_quality: dict[str, Any] = field(default_factory=dict)
+    audit_lineage: dict[str, Any] = field(default_factory=dict)
 
 
 def _message_to_dict(message: AgentMessage | dict[str, Any]) -> dict[str, Any]:
@@ -135,12 +136,36 @@ def _policy_summary(policy_decisions: list[dict[str, Any]]) -> list[dict[str, An
     summary = []
     for decision in policy_decisions:
         selected = decision.get("selected_result", decision)
+        method_evaluation = selected.get("method_evaluation", {})
+        selected_action = decision.get("selected_action") or selected.get("action")
+        selected_status = decision.get("selected_status") or selected.get("status")
+        claim_type = decision.get("claim_type") or selected.get("claim_type", "hypothesis")
+        risk_tier = method_evaluation.get("risk_tier")
+        human_review_required = bool(method_evaluation.get("human_review_required"))
+        if selected_action == "no_action":
+            effect_evidence = "baseline_no_action"
+        elif selected_status in {"blocked", "reject"} or claim_type == "blocked":
+            effect_evidence = "blocked"
+        elif claim_type == "hypothesis":
+            effect_evidence = "hypothesis_only"
+        else:
+            effect_evidence = claim_type
         summary.append(
             {
                 "subject_id": decision.get("subject_id") or selected.get("subject_id"),
-                "selected_action": decision.get("selected_action") or selected.get("action"),
-                "status": decision.get("selected_status") or selected.get("status"),
-                "claim_type": decision.get("claim_type") or selected.get("claim_type", "hypothesis"),
+                "selected_action": selected_action,
+                "status": selected_status,
+                "claim_type": claim_type,
+                "action_fit": {
+                    "fit_status": method_evaluation.get("status", selected_status),
+                    "fit_score": method_evaluation.get("fit_score"),
+                    "method": method_evaluation.get("method", selected_action),
+                    "risk_tier": risk_tier,
+                    "human_review_required": human_review_required,
+                },
+                "effect_evidence": effect_evidence,
+                "risk_tier": risk_tier,
+                "human_review_required": human_review_required,
                 "reason_codes": list(decision.get("selected_reason_codes") or selected.get("reason_codes", [])),
                 "baseline_delta": selected.get("baseline_delta"),
                 "no_action_reward": selected.get("no_action_reward"),
@@ -205,6 +230,7 @@ def build_decision_report(report_input: DecisionReportInput) -> dict[str, Any]:
             "no_pii_in_segment_view": no_pii_in_segments,
         },
         "result_quality": sanitize_for_report(report_input.result_quality),
+        "audit_lineage": sanitize_for_report(report_input.audit_lineage),
         "open_questions": sanitize_for_report(orchestrator.get("open_questions", [])),
         "risks": sanitize_for_report(orchestrator.get("risks", [])),
         "next_actions": sanitize_for_report(report_input.next_actions or _default_next_actions(final_status, uncertainty_gate)),
@@ -264,9 +290,13 @@ def render_markdown_report(report: dict[str, Any], *, include_system_checks: boo
 
     lines.extend(["", "## Nudge Recommendations", ""])
     for item in report.get("nudge_recommendations", []):
+        action_fit = item.get("action_fit", {})
         lines.append(
             f"- `{item.get('subject_id', '-')}` -> `{item.get('selected_action', 'no_action')}` "
-            f"Status: `{item.get('status', 'unknown')}` Reasons: `{', '.join(item.get('reason_codes', []))}`"
+            f"Status: `{item.get('status', 'unknown')}` "
+            f"Action fit: `{action_fit.get('fit_status', 'unknown')}` "
+            f"Effect evidence: `{item.get('effect_evidence', item.get('claim_type', 'hypothesis'))}` "
+            f"Reasons: `{', '.join(item.get('reason_codes', []))}`"
         )
     if not report.get("nudge_recommendations"):
         lines.append("- No policy recommendations provided.")

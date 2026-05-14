@@ -23,6 +23,7 @@ class DashboardAssetTests(unittest.TestCase):
         for section in [
             "analyze",
             "overview",
+            "quality",
             "evidence",
             "nudges",
             "chat",
@@ -50,6 +51,21 @@ class DashboardAssetTests(unittest.TestCase):
         self.assertIn('id="analysis-question"', html)
         self.assertIn('id="report-upload"', html)
         self.assertIn("Run engine preview", html)
+
+    def test_dashboard_surfaces_result_quality_and_audit_lineage(self) -> None:
+        html = (DASHBOARD / "index.html").read_text()
+        script = (DASHBOARD / "app.js").read_text()
+        report = json.loads((DASHBOARD / "data/sample-report.json").read_text())
+
+        self.assertIn('id="quality"', html)
+        self.assertIn('id="quality-state"', html)
+        self.assertIn('id="audit-lineage"', html)
+        self.assertIn("renderResultQuality", script)
+        self.assertIn("effect_evidence", script)
+        self.assertIn("http://127.0.0.1:8765/analyze", script)
+        self.assertIn("looksLikeEngineInput", script)
+        self.assertIn("result_quality", report)
+        self.assertIn("audit_lineage", report)
 
 
 if __name__ == "__main__":

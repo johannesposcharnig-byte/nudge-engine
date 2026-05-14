@@ -19,6 +19,7 @@
         <nav class="nav-list">
           <a href="#analyze" class="active">Analyze</a>
           <a href="#overview">Results</a>
+          <a href="#quality">Quality</a>
           <a href="#evidence">Evidence</a>
           <a href="#nudges">Nudges</a>
           <a href="#chat">Chat</a>
@@ -47,7 +48,7 @@
             <label for="report-upload">Upload report JSON</label>
             <input id="report-upload" type="file" accept="application/json,.json" />
             <button type="submit">Run engine preview</button>
-            <p id="analysis-note" class="muted">Current mode: local preview. Next step: connect this form to the Python engine/API.</p>
+            <p id="analysis-note" class="muted">Current mode: report preview or local API at http://127.0.0.1:8765/analyze when you upload customer_rows JSON.</p>
           </form>
         </section>
 
@@ -103,6 +104,44 @@
           </article>
         </section>
 
+        <section id="quality" class="panel quality-panel">
+          <div class="panel-header">
+            <div>
+              <p class="eyebrow">Result quality</p>
+              <h3>Pilot readiness and claim safety</h3>
+            </div>
+            <span class="pill" id="quality-pill">not ready</span>
+          </div>
+          <div class="quality-grid" aria-label="Quality gates">
+            <article class="quality-card">
+              <span>Decision state</span>
+              <strong id="quality-state">-</strong>
+            </article>
+            <article class="quality-card">
+              <span>Data readiness</span>
+              <strong id="quality-data">-</strong>
+            </article>
+            <article class="quality-card">
+              <span>Evidence level</span>
+              <strong id="quality-evidence">-</strong>
+            </article>
+            <article class="quality-card">
+              <span>Causal claim</span>
+              <strong id="quality-causal">-</strong>
+            </article>
+          </div>
+          <div class="quality-detail-grid">
+            <div>
+              <p class="eyebrow">Trust warnings</p>
+              <div id="quality-warnings" class="warning-list"></div>
+            </div>
+            <div>
+              <p class="eyebrow">Audit lineage</p>
+              <div id="audit-lineage" class="warning-list"></div>
+            </div>
+          </div>
+        </section>
+
         <section class="content-grid">
           <article id="evidence" class="panel wide">
             <div class="panel-header">
@@ -153,6 +192,9 @@
                   <th>Subject</th>
                   <th>Action</th>
                   <th>Status</th>
+                  <th>Evidence</th>
+                  <th>Risk</th>
+                  <th>Review</th>
                   <th>Reason</th>
                   <th>Delta</th>
                   <th>No-action</th>

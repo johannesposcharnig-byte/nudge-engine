@@ -52,6 +52,16 @@
       "selected_action": "cognitive_ease",
       "status": "hypothesis",
       "claim_type": "hypothesis",
+      "action_fit": {
+        "fit_status": "eligible",
+        "fit_score": 0.77,
+        "method": "cognitive_ease",
+        "risk_tier": "low",
+        "human_review_required": false
+      },
+      "effect_evidence": "hypothesis_only",
+      "risk_tier": "low",
+      "human_review_required": false,
       "reason_codes": ["high_friction", "reward_beats_no_action"],
       "baseline_delta": 0.11,
       "no_action_reward": 0.38
@@ -61,6 +71,16 @@
       "selected_action": "no_action",
       "status": "blocked",
       "claim_type": "blocked",
+      "action_fit": {
+        "fit_status": "blocked",
+        "fit_score": 0,
+        "method": "no_action",
+        "risk_tier": "baseline",
+        "human_review_required": false
+      },
+      "effect_evidence": "baseline_no_action",
+      "risk_tier": "baseline",
+      "human_review_required": false,
       "reason_codes": ["high_fatigue"],
       "baseline_delta": 0,
       "no_action_reward": 0.41
@@ -70,6 +90,16 @@
       "selected_action": "no_action",
       "status": "blocked",
       "claim_type": "blocked",
+      "action_fit": {
+        "fit_status": "blocked",
+        "fit_score": 0,
+        "method": "no_action",
+        "risk_tier": "baseline",
+        "human_review_required": false
+      },
+      "effect_evidence": "baseline_no_action",
+      "risk_tier": "baseline",
+      "human_review_required": false,
       "reason_codes": ["missing_consent"],
       "baseline_delta": 0,
       "no_action_reward": 0.36
@@ -112,6 +142,49 @@
       "pii_removed_from_analytics": true
     },
     "no_pii_in_segment_view": true
+  },
+  "result_quality": {
+    "decision_state": {
+      "state": "evidence_insufficient",
+      "blockers": ["significance_claim"],
+      "escalation_required": false,
+      "human_review_required": false,
+      "rationale": "Confidence interval contains the null; the report is useful for planning but not pilot approval."
+    },
+    "data_readiness": {
+      "use_case": "activation",
+      "status": "ready",
+      "score": 0.92,
+      "schema_hash": "sample-schema",
+      "row_count": 120,
+      "readiness_warnings": []
+    },
+    "claim_permission": {
+      "evidence_level": "experimental",
+      "significance_claim_allowed": false,
+      "causal_claim_allowed": true,
+      "recommendation_claim_allowed": true,
+      "effect_wording": "measured effect in experiment",
+      "blocked_claims": ["significance_claim"],
+      "required_next_evidence": ["complete_95_ci_excluding_null"]
+    },
+    "pilot_readiness": "not_ready",
+    "trust_warnings": ["no_significance_claim_allowed"]
+  },
+  "audit_lineage": {
+    "run_id": "sample_run_static",
+    "created_at": "2026-05-14T00:00:00+00:00",
+    "engine_version": "0.1.0-local",
+    "policy_version": "0.1.0-policy",
+    "report_version": "0.1.0-report",
+    "input_row_count": 120,
+    "input_schema_hash": "sample-schema",
+    "decision_state": "evidence_insufficient",
+    "blockers": ["significance_claim"],
+    "security_status": "approve",
+    "privacy_state": "pii_safe_context",
+    "human_override_status": "none",
+    "stored_raw_rows": false
   },
   "open_questions": [
     "Is the treatment/control assignment randomized?",

@@ -171,6 +171,9 @@ class ReportingTests(unittest.TestCase):
         self.assertEqual(report["nudge_recommendations"][0]["subject_id"], "sub_demo")
         self.assertIn("no_action_reward", report["nudge_recommendations"][0])
         self.assertEqual(report["nudge_recommendations"][0]["claim_type"], "hypothesis")
+        self.assertIn("action_fit", report["nudge_recommendations"][0])
+        self.assertEqual(report["nudge_recommendations"][0]["effect_evidence"], "hypothesis_only")
+        self.assertIn("human_review_required", report["nudge_recommendations"][0])
 
     def test_markdown_contains_required_sections(self) -> None:
         report = build_decision_report(
