@@ -11,6 +11,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .agents.base import AgentMessage
+from .claim_permissions import evaluate_claim_permission
+from .data_contracts import evaluate_activation_data_contract
 from .evidence import (
     build_mece_hypotheses,
     clarification_questions_for_missing,
@@ -18,8 +20,14 @@ from .evidence import (
     infer_customer_data_profile,
 )
 from .orchestrator import Orchestrator, Task
-from .pii_vault import IDENTITY_FIELD_NAMES, PII_FIELD_NAMES, pseudonymize_customer_rows
+from .pii_vault import (
+    IDENTITY_FIELD_NAMES,
+    PII_FIELD_NAMES,
+    analytics_rows_are_pii_safe,
+    pseudonymize_customer_rows,
+)
 from .reporting import DecisionReportInput, build_decision_report
+from .result_quality import evaluate_result_quality
 from .reward import policy_decision_for_person
 from .security import SecurityReview, leonidas_security_review
 from .simulation import ab_mean_difference_ci
@@ -122,6 +130,7 @@ def run_analysis(request: AnalysisRequest | dict[str, Any]) -> dict[str, Any]:
         )
 
     context = _build_analysis_context(parsed, analytics_rows, analytics_security, vault.redaction_summary)
+    data_readiness = evaluate_activation_data_contract(analytics_rows).as_dict()
     orchestrator = Orchestrator()
     intake_result = orchestrator.run_orchestration(
         Task(
@@ -134,10 +143,25 @@ def run_analysis(request: AnalysisRequest | dict[str, Any]) -> dict[str, Any]:
 
     hypotheses = build_mece_hypotheses({**context, "customer_data_profile": infer_customer_data_profile(context)})
     uncertainty = _calculate_ab_uncertainty(analytics_rows, context, parsed.confidence_level)
+    claim_permission = evaluate_claim_permission(
+        uncertainty=uncertainty,
+        has_treatment_control=bool(context.get("treatment_group") and context.get("control_group")),
+        has_no_action_baseline=_has_measured_no_action_baseline(analytics_rows),
+        identification_strategy=parsed.config.get("identification_strategy"),
+        replicated=bool(parsed.config.get("replicated_evidence")),
+    ).as_dict()
     formula_result = _maybe_review_formula(orchestrator, parsed, context, uncertainty)
     final_result = formula_result or _with_uncertainty(intake_result, uncertainty)
 
     policy_decisions = _policy_decisions(analytics_rows, parsed.config)
+    result_quality = evaluate_result_quality(
+        data_readiness=data_readiness,
+        claim_permission=claim_permission,
+        security_review=analytics_security.as_dict(),
+        privacy_safe=analytics_rows_are_pii_safe(analytics_rows),
+        policy_decisions=policy_decisions,
+        human_approved=bool(parsed.config.get("human_approved")),
+    ).as_dict()
     next_actions = _next_actions(final_result, uncertainty, policy_decisions)
     return build_decision_report(
         DecisionReportInput(
@@ -150,6 +174,7 @@ def run_analysis(request: AnalysisRequest | dict[str, Any]) -> dict[str, Any]:
             uncertainty=uncertainty,
             segment_rows=_segment_rows(analytics_rows),
             next_actions=next_actions,
+            result_quality=result_quality,
         )
     )
 
@@ -306,6 +331,10 @@ def _coerce_float(value: Any) -> float | None:
         except ValueError:
             return None
     return None
+
+
+def _has_measured_no_action_baseline(rows: list[dict[str, Any]]) -> bool:
+    return any(isinstance(row.get("no_action_baseline"), dict) for row in rows)
 
 
 def _maybe_review_formula(

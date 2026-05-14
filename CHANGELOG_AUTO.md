@@ -149,3 +149,47 @@ Other diff options
                           select files by diff type
     --output <file>       output to a specific file
 ```
+
+## 2026-05-14T12:31:43+00:00
+
+- Test status: `tests_passed`
+- Latest commit: `783bac5 initial commit: governed nudge engine`
+- Note: Safe checkpoint generated before push.
+
+### Changed Files
+
+- `M DASHBOARD_UX_SPEC.md`
+- `M README.md`
+- `M dashboard/app.js`
+- `M dashboard/data/sample-report.json`
+- `M src/analysis_service.py`
+- `M src/behavioral_methods.py`
+- `M src/reporting.py`
+- `M tests/test_analysis_service.py`
+- `M tests/test_behavioral_methods.py`
+- `?? ARCHITECTURE_REVIEW.md`
+- `?? CLAIM_PERMISSION_MATRIX.md`
+- `?? DECISION_STATE_MODEL.md`
+- `?? FEATURE_CONTROL_MATRIX.md`
+- `?? INTERVENTION_RISK_TIERING.md`
+- `?? LAYER_CONTROL_MATRIX.md`
+- `?? PILOT_PRODUCTION_STATUS_MATRIX.md`
+- `?? src/claim_permissions.py`
+- `?? src/data_contracts.py`
+- `?? src/decision_states.py`
+- `?? src/result_quality.py`
+
+### Diff Stat
+
+```text
+DASHBOARD_UX_SPEC.md              |  7 +++-
+ README.md                         |  7 ++++
+ dashboard/app.js                  |  6 ++--
+ dashboard/data/sample-report.json |  2 +-
+ src/analysis_service.py           | 31 ++++++++++++++++-
+ src/behavioral_methods.py         | 71 +++++++++++++++++++++++++++++++++++++++
+ src/reporting.py                  |  2 ++
+ tests/test_analysis_service.py    |  8 +++++
+ tests/test_behavioral_methods.py  | 25 ++++++++++++++
+ 9 files changed, 153 insertions(+), 6 deletions(-)
+```

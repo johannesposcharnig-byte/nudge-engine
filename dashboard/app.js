@@ -163,7 +163,7 @@ function renderNudges(items) {
 function renderSystemChecks(review, piiSummary, noPii) {
   const container = $("system-list");
   const items = [
-    ["Leonidas status", review.security_status || "unknown"],
+    ["Security check status", review.security_status || "unknown"],
     ["Risk level", review.risk_level || "unknown"],
     ["Safe to reason", formatValue(review.safe_to_reason)],
     ["Safe to execute", formatValue(review.safe_to_execute)],
@@ -222,8 +222,8 @@ function answerQuestion(question) {
   if (normalized.includes("ci") || normalized.includes("confidence") || normalized.includes("significant")) {
     return `CI gate is ${gate.status}. Significance allowed: ${gate.significance_claim_allowed ? "yes" : "no"}. ${gate.summary || ""}`;
   }
-  if (normalized.includes("security") || normalized.includes("leonidas")) {
-    return `Background system checks passed as ${review.security_status || "unknown"} with risk level ${review.risk_level || "unknown"}. I keep this behind the scenes unless you ask for it.`;
+  if (normalized.includes("security") || normalized.includes("integrity") || normalized.includes("leonidas")) {
+    return `Background security and integrity checks are ${review.security_status || "unknown"} with risk level ${review.risk_level || "unknown"}. This is an internal gate, not a product-facing recommendation agent.`;
   }
   if (normalized.includes("pii") || normalized.includes("privacy") || normalized.includes("vault")) {
     return `Privacy status: no PII in segment view is ${formatValue(security.no_pii_in_segment_view)}. The result view uses subject_id only.`;

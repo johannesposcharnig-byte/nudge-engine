@@ -56,9 +56,16 @@ class AnalysisServiceTests(unittest.TestCase):
         self.assertIn("hypotheses", report)
         self.assertIn("nudge_recommendations", report)
         self.assertIn("evidence_and_uncertainty", report)
+        self.assertIn("result_quality", report)
         self.assertNotIn("user0@example.com", as_text)
         self.assertNotIn('"user_id"', as_text)
         self.assertTrue(report["security_and_governance"]["no_pii_in_segment_view"])
+        self.assertEqual(report["result_quality"]["data_readiness"]["status"], "ready")
+        self.assertTrue(report["result_quality"]["claim_permission"]["significance_claim_allowed"])
+        self.assertIn(
+            report["result_quality"]["decision_state"]["state"],
+            {"pilot_candidate", "human_review_required"},
+        )
         self.assertIn(
             report["evidence_and_uncertainty"]["uncertainty"].get("confidence_level"),
             {0.95, 0.9},
@@ -107,6 +114,7 @@ class AnalysisServiceTests(unittest.TestCase):
 
         self.assertEqual(report["executive_summary"]["status"], "hold")
         self.assertFalse(report["evidence_and_uncertainty"]["gate"]["significance_claim_allowed"])
+        self.assertEqual(report["result_quality"]["decision_state"]["state"], "data_required")
         self.assertIn("Zielvariable", " ".join(report["open_questions"]))
 
     def test_missing_identity_field_holds_before_pseudonymization(self) -> None:

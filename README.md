@@ -66,6 +66,13 @@ Ein wissenschaftlich fundiertes Modell fuer eine Nudge Engine, die Verhaltensdat
 - Fehlende Zielvariable, fehlende Identity, fehlende Treatment/Control-Logik oder Security-Risiken erzeugen `hold`/`reject` statt ungesicherter Aussagen.
 - Referenz: [Engine Functionality Check](./ENGINE_FUNCTIONALITY_CHECK.md)
 
+## Architecture Control
+
+- Die Engine wird als Evidence- und Governance-gated Decision Support System gefuehrt, nicht als einfacher Recommendation Generator.
+- Claim Permission, Data Contract, Decision State und Result Quality sind Pflichtkontrollen vor API/Dashboard-Live-Schaltung.
+- Interne Security heisst produktseitig `Security & Integrity Check`; Leonidas bleibt eine interne Gate-Bezeichnung, kein fachlicher Produkt-Agent.
+- Referenzen: [Architecture Review](./ARCHITECTURE_REVIEW.md), [Feature Control Matrix](./FEATURE_CONTROL_MATRIX.md), [Layer Control Matrix](./LAYER_CONTROL_MATRIX.md), [Claim Permission Matrix](./CLAIM_PERMISSION_MATRIX.md), [Decision State Model](./DECISION_STATE_MODEL.md), [Intervention Risk Tiering](./INTERVENTION_RISK_TIERING.md)
+
 ## Dashboard UX
 
 - Ein helles Dashboard unter `dashboard/index.html` ist als Einstieg fuer Frage/Daten -> Engine Run -> Ergebnis gedacht.

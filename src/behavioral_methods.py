@@ -8,6 +8,7 @@ from typing import Any, Literal
 
 MethodKind = Literal["baseline", "action", "meta"]
 MethodStatus = Literal["eligible", "blocked"]
+RiskTier = Literal["baseline", "low", "medium", "high", "meta", "prohibited"]
 
 
 @dataclass(frozen=True)
@@ -33,6 +34,8 @@ class MethodEvaluation:
     required_signals: list[str]
     governance_required: bool
     manipulation_risk: str
+    risk_tier: RiskTier
+    human_review_required: bool
     claim_type: str = "hypothesis"
 
     def as_dict(self) -> dict[str, Any]:
@@ -44,6 +47,8 @@ class MethodEvaluation:
             "required_signals": list(self.required_signals),
             "governance_required": self.governance_required,
             "manipulation_risk": self.manipulation_risk,
+            "risk_tier": self.risk_tier,
+            "human_review_required": self.human_review_required,
             "claim_type": self.claim_type,
         }
 
@@ -190,6 +195,66 @@ BEHAVIORAL_METHOD_REGISTRY: dict[str, BehavioralMethod] = {
     ),
 }
 
+INTERVENTION_RISK_TIERS: dict[str, RiskTier] = {
+    "no_action": "baseline",
+    "cognitive_ease": "low",
+    "simplification": "low",
+    "gain_frame": "low",
+    "goal_setting": "low",
+    "progress_feedback": "low",
+    "transparency_explanation": "low",
+    "default": "medium",
+    "social_proof": "medium",
+    "commitment": "medium",
+    "reciprocity": "medium",
+    "timely_reminder": "medium",
+    "just_in_time_intervention": "medium",
+    "progress_oriented_default": "medium",
+    "loss_frame": "high",
+    "personalization": "meta",
+}
+
+PROHIBITED_BEHAVIORAL_TECHNIQUES = {
+    "deceptive_urgency",
+    "shame_based_nudge",
+    "fear_exploitation",
+    "social_exposure_pressure",
+    "vulnerability_targeting",
+    "hidden_default",
+    "fake_scarcity",
+    "manipulative_reciprocity",
+    "dark_pattern_opt_out_friction",
+}
+
+HUMAN_REVIEW_RISK_TIERS = {"high"}
+HUMAN_REVIEW_METHODS = {
+    "loss_frame",
+    "social_proof",
+    "reciprocity",
+    "default",
+    "progress_oriented_default",
+}
+
+
+def intervention_risk_tier(method: str) -> RiskTier:
+    if method in PROHIBITED_BEHAVIORAL_TECHNIQUES:
+        return "prohibited"
+    return INTERVENTION_RISK_TIERS.get(method, "prohibited")
+
+
+def human_review_required_for_method(method: str) -> bool:
+    tier = intervention_risk_tier(method)
+    return tier in HUMAN_REVIEW_RISK_TIERS or method in HUMAN_REVIEW_METHODS
+
+
+def intervention_risk_tier_coverage() -> dict[str, list[str]]:
+    registered = set(BEHAVIORAL_METHOD_REGISTRY)
+    covered = set(INTERVENTION_RISK_TIERS)
+    return {
+        "missing": sorted(registered - covered),
+        "extra": sorted(covered - registered),
+    }
+
 
 def action_methods() -> list[str]:
     return [
@@ -232,6 +297,8 @@ def evaluate_behavioral_method(method_name: str, context: dict[str, Any]) -> Met
             required_signals=[],
             governance_required=True,
             manipulation_risk="unknown",
+            risk_tier=intervention_risk_tier(method_name),
+            human_review_required=True,
             claim_type="blocked",
         )
     if method.kind == "baseline":
@@ -243,6 +310,8 @@ def evaluate_behavioral_method(method_name: str, context: dict[str, Any]) -> Met
             required_signals=list(method.required_signals),
             governance_required=method.governance_required,
             manipulation_risk=method.manipulation_risk,
+            risk_tier=intervention_risk_tier(method.method),
+            human_review_required=False,
             claim_type="observed",
         )
 
@@ -267,6 +336,8 @@ def evaluate_behavioral_method(method_name: str, context: dict[str, Any]) -> Met
         required_signals=list(method.required_signals),
         governance_required=method.governance_required,
         manipulation_risk=method.manipulation_risk,
+        risk_tier=intervention_risk_tier(method.method),
+        human_review_required=human_review_required_for_method(method.method),
         claim_type=method.allowed_claim_type if status == "eligible" else "blocked",
     )
 

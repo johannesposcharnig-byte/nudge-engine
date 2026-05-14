@@ -48,6 +48,7 @@ class DecisionReportInput:
     uncertainty: dict[str, Any] = field(default_factory=dict)
     segment_rows: list[dict[str, Any]] = field(default_factory=list)
     next_actions: list[str] = field(default_factory=list)
+    result_quality: dict[str, Any] = field(default_factory=dict)
 
 
 def _message_to_dict(message: AgentMessage | dict[str, Any]) -> dict[str, Any]:
@@ -203,6 +204,7 @@ def build_decision_report(report_input: DecisionReportInput) -> dict[str, Any]:
             "pii_redaction_summary": pii_summary,
             "no_pii_in_segment_view": no_pii_in_segments,
         },
+        "result_quality": sanitize_for_report(report_input.result_quality),
         "open_questions": sanitize_for_report(orchestrator.get("open_questions", [])),
         "risks": sanitize_for_report(orchestrator.get("risks", [])),
         "next_actions": sanitize_for_report(report_input.next_actions or _default_next_actions(final_status, uncertainty_gate)),

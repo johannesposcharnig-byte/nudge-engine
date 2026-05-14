@@ -103,7 +103,7 @@ Shows:
 
 Shows:
 
-- Leonidas status
+- Security check status
 - risk level
 - safe-to-reason
 - safe-to-execute
@@ -112,6 +112,11 @@ Shows:
 - vault record count
 
 This section is collapsed behind a small system strip by default. Security is essential, but it should not dominate the business result view.
+
+Naming rule:
+
+- Product-facing copy says `Security & Integrity Check`.
+- The internal implementation may still use `Leonidas`, but the dashboard must not frame it as a recommendation or programming agent.
 
 ### Report Chat Preview
 

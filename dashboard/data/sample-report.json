@@ -102,7 +102,7 @@
       "risk_level": "low",
       "safe_to_reason": true,
       "safe_to_execute": true,
-      "decision_rationale": "Leonidas found no security or integrity blockers."
+      "decision_rationale": "The internal security and integrity gate found no blockers."
     },
     "pii_redaction_summary": {
       "redacted_field_count": 2,

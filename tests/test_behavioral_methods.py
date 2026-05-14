@@ -13,6 +13,9 @@ from src.behavioral_methods import (
     BEHAVIORAL_METHOD_REGISTRY,
     action_methods,
     evaluate_behavioral_method,
+    human_review_required_for_method,
+    intervention_risk_tier,
+    intervention_risk_tier_coverage,
     meta_methods,
 )
 
@@ -85,6 +88,28 @@ class BehavioralMethodRegistryTests(unittest.TestCase):
         self.assertEqual(result.status, "blocked")
         self.assertIn("unknown_behavioral_method", result.reason_codes)
         self.assertEqual(result.claim_type, "blocked")
+
+    def test_all_registered_methods_have_intervention_risk_tiers(self) -> None:
+        coverage = intervention_risk_tier_coverage()
+
+        self.assertEqual(coverage["missing"], [])
+        self.assertEqual(coverage["extra"], [])
+        self.assertEqual(intervention_risk_tier("loss_frame"), "high")
+        self.assertEqual(intervention_risk_tier("no_action"), "baseline")
+        self.assertEqual(intervention_risk_tier("personalization"), "meta")
+        self.assertEqual(intervention_risk_tier("fake_scarcity"), "prohibited")
+
+    def test_human_review_required_for_sensitive_methods(self) -> None:
+        self.assertTrue(human_review_required_for_method("loss_frame"))
+        self.assertTrue(human_review_required_for_method("social_proof"))
+        self.assertFalse(human_review_required_for_method("cognitive_ease"))
+
+        result = evaluate_behavioral_method(
+            "social_proof",
+            {"peer_norm_signal": 0.8, "peer_reference_group_valid": True},
+        )
+        self.assertTrue(result.as_dict()["human_review_required"])
+        self.assertEqual(result.as_dict()["risk_tier"], "medium")
 
 
 if __name__ == "__main__":
