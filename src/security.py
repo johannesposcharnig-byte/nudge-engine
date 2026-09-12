@@ -5,6 +5,7 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 import math
 import re
+import unicodedata
 from typing import Any, Literal
 
 
@@ -171,7 +172,9 @@ def _flatten_text(value: Any) -> str:
 
 
 def _normalize_text(value: str) -> str:
-    lowered = value.lower()
+    canonical = unicodedata.normalize("NFKC", value)
+    canonical = "".join(character for character in canonical if unicodedata.category(character) != "Cf")
+    lowered = canonical.lower()
     alphanumeric = re.sub(r"[^a-z0-9]+", " ", lowered)
     return " ".join(alphanumeric.split())
 

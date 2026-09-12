@@ -169,14 +169,52 @@
       "required_next_evidence": ["complete_95_ci_excluding_null"]
     },
     "pilot_readiness": "not_ready",
-    "trust_warnings": ["no_significance_claim_allowed"]
+    "trust_warnings": ["no_significance_claim_allowed", "approval_not_provided"],
+    "approval": {
+      "valid": false,
+      "status": "not_provided",
+      "approved_scopes": [],
+      "blockers": ["approval_not_provided"]
+    }
+  },
+  "experiment_design": {
+    "status": "experiment_required",
+    "experiment_required": true,
+    "hypothesis": {
+      "id": "H4",
+      "statement": "The selected intervention may change activation relative to no action.",
+      "status": "testable"
+    },
+    "outcome_variable": "activation_score",
+    "treatment": {"field": "experiment_group", "condition": "treatment"},
+    "control_condition": "control_or_no_action",
+    "primary_metric": "activation_score",
+    "guardrails": ["consent_required", "opt_out_available", "frequency_cap", "fatigue_monitoring", "harm_monitoring", "no_action_baseline"],
+    "measurement_window": "14_days",
+    "required_data": ["activation_score", "consent", "event_time", "experiment_group", "subject_id"],
+    "recommended_method": "ab_test",
+    "confidence_level": 0.95,
+    "open_assumptions": ["Randomization integrity must be checked."],
+    "blockers": ["current_ci_contains_null"],
+    "claim_permission": "This is a measurement plan, not evidence that the intervention works."
+  },
+  "approval": {
+    "valid": false,
+    "status": "not_provided",
+    "actor": null,
+    "reason": null,
+    "approved_scopes": [],
+    "linked_run_id": null,
+    "risk_tier": null,
+    "blockers": ["approval_not_provided"],
+    "override_reason": null
   },
   "audit_lineage": {
     "run_id": "sample_run_static",
     "created_at": "2026-05-14T00:00:00+00:00",
-    "engine_version": "0.1.0-local",
+    "engine_version": "0.2.0-local",
     "policy_version": "0.1.0-policy",
-    "report_version": "0.1.0-report",
+    "report_version": "0.2.0-report",
     "input_row_count": 120,
     "input_schema_hash": "sample-schema",
     "decision_state": "evidence_insufficient",
@@ -184,6 +222,11 @@
     "security_status": "approve",
     "privacy_state": "pii_safe_context",
     "human_override_status": "none",
+    "approval_decision": {
+      "valid": false,
+      "status": "not_provided",
+      "blockers": ["approval_not_provided"]
+    },
     "stored_raw_rows": false
   },
   "open_questions": [

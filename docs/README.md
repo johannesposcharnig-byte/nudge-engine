@@ -13,6 +13,8 @@ The root-level Markdown files remain as deep reference material and project hist
 - [Security and Privacy](./SECURITY_AND_PRIVACY.md)
 - [Evidence and Claims](./EVIDENCE_AND_CLAIMS.md)
 - [Dashboard](./DASHBOARD.md)
+- [Governed Outreach Export](./OUTREACH_EXPORT.md)
+- [Validation Sprint 2026-06-20](./VALIDATION_SPRINT_2026-06-20.md)
 - [Roadmap](./ROADMAP.md)
 - [Human Changelog](./CHANGELOG.md)
 
@@ -63,4 +65,3 @@ Security and privacy:
 - [Security Integrity Layer](../SECURITY_INTEGRITY_LAYER.md)
 - [Security Deep Check Report](../SECURITY_DEEP_CHECK_REPORT.md)
 - [PII Vault Architecture](../PII_VAULT_ARCHITECTURE.md)
-

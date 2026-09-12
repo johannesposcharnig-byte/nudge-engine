@@ -27,12 +27,19 @@ Implemented:
 - Local API smoke test
 - GitHub validation workflow
 - Safe checkpoint push script
+- Experiment Design Assistant v1
+- Run-bound structured approval gate
+- Local protected vault and governed outreach export
+- Four synthetic end-to-end reference cases
+- Dashboard experiment and approval visibility
+- Unicode prompt-injection normalization and stricter CI consistency checks
 
 Validated:
 
 - Unit tests pass locally
 - Python compile check passes locally
 - Local HTTP API smoke test passes when the API is running
+- 158 unit and integration tests pass locally at this milestone
 
 Known limits:
 
@@ -42,4 +49,3 @@ Known limits:
 - No persistent audit store
 - No production deployment
 - No autonomous execution
-

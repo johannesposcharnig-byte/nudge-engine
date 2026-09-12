@@ -98,8 +98,9 @@ def evaluate_claim_permission(
         key in uncertainty
         for key in ["effect_estimate", "ci_lower", "ci_upper", "ci_method", "sample_size", "confidence_level", "contains_null"]
     )
+    ci_valid = ci_complete and _valid_interval(uncertainty)
     significance_allowed = (
-        ci_complete
+        ci_valid
         and uncertainty.get("contains_null") is False
         and float(uncertainty.get("confidence_level", 0.0)) >= 0.95
     )
@@ -127,3 +128,15 @@ def evaluate_claim_permission(
         blocked_claims=sorted(set(blocked)),
         required_next_evidence=sorted(set(required)),
     )
+
+
+def _valid_interval(uncertainty: dict[str, Any]) -> bool:
+    try:
+        lower = float(uncertainty["ci_lower"])
+        estimate = float(uncertainty["effect_estimate"])
+        upper = float(uncertainty["ci_upper"])
+        sample_size = int(uncertainty["sample_size"])
+    except (KeyError, TypeError, ValueError):
+        return False
+    contains_null = lower <= 0 <= upper
+    return lower <= estimate <= upper and sample_size > 1 and uncertainty.get("contains_null") is contains_null

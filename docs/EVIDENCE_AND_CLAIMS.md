@@ -36,6 +36,8 @@ Significance is allowed only when:
 - `sample_size` exists
 - `confidence_level >= 0.95`
 - CI excludes the null
+- interval bounds contain the estimate and agree with `contains_null`
+- sample size is technically valid
 
 If these are missing or incomplete, the report must block significance wording.
 
@@ -48,6 +50,10 @@ Causal claims require:
 
 Without this, the engine may generate hypotheses or experiment suggestions, not causal impact claims.
 
+## Experiment Plans
+
+An experiment plan is a next-step artifact, not proof of effect. It records the hypothesis, outcome, treatment/control conditions, method, guardrails, measurement window, required data, assumptions and blockers. Missing domain inputs remain marked as clarification requirements.
+
 ## Blocked Wording
 
 Avoid:
@@ -58,4 +64,3 @@ Avoid:
 - best intervention
 - the user has bias X
 - significant, unless CI gate passes
-

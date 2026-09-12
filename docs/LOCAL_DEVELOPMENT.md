@@ -65,6 +65,21 @@ The payload contains synthetic activation rows with:
 - no-action baseline
 - guardrails
 
+## Synthetic End-to-End Reference Cases
+
+The automated suite includes four reference flows:
+
+- complete synthetic treatment/control data
+- missing outcome data
+- treatment without a usable control group
+- prompt injection inside a customer-row text field
+
+Run them with:
+
+```bash
+PYTHONPYCACHEPREFIX=/tmp/nudge_engine_pycache python3 -m unittest tests.test_end_to_end_reference_cases
+```
+
 ## Dashboard Preview
 
 Open:
@@ -87,4 +102,3 @@ bash scripts/safe_checkpoint_push.sh "checkpoint: describe the change"
 ```
 
 The script runs tests, compile check, updates `CHANGELOG_AUTO.md`, commits and pushes.
-

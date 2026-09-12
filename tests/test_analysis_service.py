@@ -58,6 +58,8 @@ class AnalysisServiceTests(unittest.TestCase):
         self.assertIn("evidence_and_uncertainty", report)
         self.assertIn("result_quality", report)
         self.assertIn("audit_lineage", report)
+        self.assertIn("experiment_design", report)
+        self.assertIn("approval", report)
         self.assertNotIn("user0@example.com", as_text)
         self.assertNotIn('"user_id"', as_text)
         self.assertTrue(report["security_and_governance"]["no_pii_in_segment_view"])
@@ -73,6 +75,33 @@ class AnalysisServiceTests(unittest.TestCase):
         )
         self.assertFalse(report["audit_lineage"]["stored_raw_rows"])
         self.assertEqual(report["audit_lineage"]["input_row_count"], len(self.valid_rows()))
+
+    def test_structured_approval_is_bound_to_run_and_audited(self) -> None:
+        run_id = "run_synthetic_approval"
+        report = run_analysis(
+            AnalysisRequest(
+                question="Welche Nudges verbessern Aktivierung?",
+                customer_rows=self.valid_rows(),
+                identity_fields=["user_id"],
+                config={
+                    "run_id": run_id,
+                    "outcome_variable": "activation_score",
+                    "approval_context": {
+                        "status": "approved",
+                        "actor": "pilot_owner",
+                        "reason": "synthetic run reviewed",
+                        "timestamp": "2026-06-20T10:00:00+00:00",
+                        "approved_scopes": ["pilot_review"],
+                        "linked_run_id": run_id,
+                        "intervention_risk_tier": "low",
+                    },
+                },
+            )
+        )
+
+        self.assertTrue(report["approval"]["valid"])
+        self.assertEqual(report["audit_lineage"]["run_id"], run_id)
+        self.assertEqual(report["audit_lineage"]["approval_decision"]["actor"], "pilot_owner")
 
     def test_prompt_injection_in_customer_rows_blocks_before_reasoning(self) -> None:
         rows = self.valid_rows()

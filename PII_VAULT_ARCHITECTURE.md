@@ -121,10 +121,16 @@ Current implemented action:
 
 - `pseudonymize`
 
-Future production actions:
+Local protected vault actions:
 
 - `reidentify`
+- `reidentify_rejected`
 - `delete_subject`
+- `delete_subject_rejected`
+- `retention_expire`
+
+Future production actions:
+
 - `rotate_key`
 - `export_subject`
 
@@ -148,6 +154,9 @@ Functions:
 - `stable_subject_id()`
 - `pseudonymize_customer_rows()`
 - `analytics_rows_are_pii_safe()`
+- `LocalVaultStore.resolve_subject_identity()`
+- `LocalVaultStore.delete_subject()`
+- `LocalVaultStore.apply_retention_policy()`
 
 Returned objects:
 
@@ -155,6 +164,22 @@ Returned objects:
 - `vault_records`
 - `audit_events`
 - `redaction_summary`
+
+## Governed Outreach Export
+
+The engine does not directly contact customers. It produces pseudonymous nudge candidates.
+
+Operational outreach requires:
+
+1. approved recommendation candidate
+2. explicit human approval where required
+3. vault subject still active
+4. controlled identity resolution
+5. audited CSV/JSON export
+
+Reference:
+
+- [Governed Outreach Export](./docs/OUTREACH_EXPORT.md)
 
 ## Important Production Difference
 

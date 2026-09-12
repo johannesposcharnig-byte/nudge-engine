@@ -122,6 +122,23 @@ class ReportingTests(unittest.TestCase):
         self.assertEqual(report["evidence_and_uncertainty"]["gate"]["status"], "revise")
         self.assertFalse(report["evidence_and_uncertainty"]["gate"]["significance_claim_allowed"])
 
+    def test_report_holds_internally_inconsistent_interval(self) -> None:
+        message = self.make_message(
+            uncertainty={
+                "effect_estimate": 0.4,
+                "ci_lower": 0.2,
+                "ci_upper": 0.1,
+                "ci_method": "bootstrap",
+                "sample_size": 80,
+                "confidence_level": 0.95,
+                "contains_null": False,
+            }
+        )
+
+        report = build_decision_report(DecisionReportInput(title="Broken CI", orchestrator_result=message))
+        self.assertEqual(report["evidence_and_uncertainty"]["gate"]["status"], "hold")
+        self.assertFalse(report["evidence_and_uncertainty"]["gate"]["significance_claim_allowed"])
+
     def test_report_holds_without_uncertainty(self) -> None:
         report = build_decision_report(
             DecisionReportInput(
@@ -188,6 +205,7 @@ class ReportingTests(unittest.TestCase):
             "Executive Summary",
             "Evidence & Confidence",
             "Hypotheses",
+            "Experiment & Approval",
             "Nudge Recommendations",
             "Segment View",
             "Next Actions",

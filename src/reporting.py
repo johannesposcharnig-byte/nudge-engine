@@ -50,6 +50,8 @@ class DecisionReportInput:
     next_actions: list[str] = field(default_factory=list)
     result_quality: dict[str, Any] = field(default_factory=dict)
     audit_lineage: dict[str, Any] = field(default_factory=dict)
+    experiment_design: dict[str, Any] = field(default_factory=dict)
+    approval: dict[str, Any] = field(default_factory=dict)
 
 
 def _message_to_dict(message: AgentMessage | dict[str, Any]) -> dict[str, Any]:
@@ -116,6 +118,19 @@ def _uncertainty_decision(uncertainty: dict[str, Any]) -> dict[str, Any]:
         return {
             "status": "hold",
             "summary": f"Uncertainty fields are incomplete: {', '.join(missing)}.",
+            "significance_claim_allowed": False,
+        }
+    try:
+        lower = float(uncertainty["ci_lower"])
+        estimate = float(uncertainty["effect_estimate"])
+        upper = float(uncertainty["ci_upper"])
+        sample_size = int(uncertainty["sample_size"])
+    except (TypeError, ValueError):
+        lower, estimate, upper, sample_size = 1.0, 0.0, -1.0, 0
+    if lower > estimate or estimate > upper or sample_size <= 1 or uncertainty.get("contains_null") is not (lower <= 0 <= upper):
+        return {
+            "status": "hold",
+            "summary": "Confidence interval fields are internally inconsistent.",
             "significance_claim_allowed": False,
         }
     if uncertainty.get("contains_null") is True:
@@ -230,6 +245,8 @@ def build_decision_report(report_input: DecisionReportInput) -> dict[str, Any]:
             "no_pii_in_segment_view": no_pii_in_segments,
         },
         "result_quality": sanitize_for_report(report_input.result_quality),
+        "experiment_design": sanitize_for_report(report_input.experiment_design),
+        "approval": sanitize_for_report(report_input.approval),
         "audit_lineage": sanitize_for_report(report_input.audit_lineage),
         "open_questions": sanitize_for_report(orchestrator.get("open_questions", [])),
         "risks": sanitize_for_report(orchestrator.get("risks", [])),
@@ -287,6 +304,22 @@ def render_markdown_report(report: dict[str, Any], *, include_system_checks: boo
         )
     if not report.get("hypotheses"):
         lines.append("- No hypotheses provided.")
+
+    experiment = report.get("experiment_design", {})
+    approval = report.get("approval", {})
+    lines.extend(
+        [
+            "",
+            "## Experiment & Approval",
+            "",
+            f"- Experiment status: `{experiment.get('status', 'not_evaluated')}`",
+            f"- Recommended method: `{experiment.get('recommended_method', 'not_selected')}`",
+            f"- Measurement window: `{experiment.get('measurement_window', 'not_defined')}`",
+            f"- Claim boundary: {experiment.get('claim_permission', 'No experiment plan attached.')}",
+            f"- Human approval: `{approval.get('status', 'not_provided')}`",
+            f"- Approval scopes: `{', '.join(approval.get('approved_scopes', []))}`",
+        ]
+    )
 
     lines.extend(["", "## Nudge Recommendations", ""])
     for item in report.get("nudge_recommendations", []):

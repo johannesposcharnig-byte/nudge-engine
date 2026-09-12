@@ -24,6 +24,7 @@ class DashboardAssetTests(unittest.TestCase):
             "analyze",
             "overview",
             "quality",
+            "experiment",
             "evidence",
             "nudges",
             "chat",
@@ -61,6 +62,8 @@ class DashboardAssetTests(unittest.TestCase):
         self.assertIn('id="quality-state"', html)
         self.assertIn('id="audit-lineage"', html)
         self.assertIn("renderResultQuality", script)
+        self.assertIn("renderExperimentAndApproval", script)
+        self.assertIn('id="approval-status"', html)
         self.assertIn("effect_evidence", script)
         self.assertIn("http://127.0.0.1:8765/analyze", script)
         self.assertIn("looksLikeEngineInput", script)

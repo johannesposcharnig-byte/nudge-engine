@@ -38,6 +38,8 @@ const fallbackReport = {
     trust_warnings: ["missing_report_data"],
   },
   audit_lineage: {},
+  experiment_design: { status: "clarification_required", experiment_required: false, blockers: ["missing_report_data"] },
+  approval: { status: "not_provided", valid: false, blockers: ["approval_not_provided"] },
   next_actions: ["Load a report JSON payload."],
 };
 
@@ -103,7 +105,32 @@ function renderDashboard() {
   renderNudges(report.nudge_recommendations || []);
   renderSystemChecks(securityReview, security.pii_redaction_summary || {}, security.no_pii_in_segment_view);
   renderResultQuality(report.result_quality || {}, report.audit_lineage || {});
+  renderExperimentAndApproval(report.experiment_design || {}, report.approval || report.result_quality?.approval || {});
   renderNextActions(report.next_actions || []);
+}
+
+function renderExperimentAndApproval(experiment, approval) {
+  const status = experiment.status || "not_evaluated";
+  text("experiment-status", status);
+  text("experiment-method", experiment.recommended_method || "not selected");
+  text("experiment-window", experiment.measurement_window || "not required");
+  text("experiment-pill", experiment.experiment_required ? "experiment required" : status.replaceAll("_", " "));
+  text("approval-status", approval.valid ? "approved" : approval.status || "not provided");
+
+  const blockers = [...(experiment.blockers || []), ...(experiment.clarification_questions || [])];
+  $("experiment-blockers").innerHTML = blockers.length
+    ? blockers.map((item) => `<div class="warning-item">${escapeHtml(item)}</div>`).join("")
+    : '<div class="warning-item ok">No experiment blockers in this report.</div>';
+
+  const approvalItems = [
+    ["Actor", approval.actor],
+    ["Run", approval.linked_run_id],
+    ["Scopes", (approval.approved_scopes || []).join(", ")],
+    ["Blockers", (approval.blockers || []).join(", ")],
+  ].filter(([, value]) => value);
+  $("approval-details").innerHTML = approvalItems.length
+    ? approvalItems.map(([label, value]) => `<div class="warning-item"><strong>${escapeHtml(label)}:</strong> ${escapeHtml(value)}</div>`).join("")
+    : '<div class="warning-item">No approved human review is attached to this run.</div>';
 }
 
 function renderCi(uncertainty, gate) {

@@ -20,6 +20,9 @@ It is not production-ready.
 - Reward and no-action policy logic: `src/reward.py`
 - Result Quality: `src/result_quality.py`
 - Audit Lineage: `src/audit_lineage.py`
+- Experiment Design Assistant: `src/experiment_design.py`
+- Structured Approval Gate: `src/approval.py`
+- Local Protected Vault and Governed Outreach Export: `src/vault_store.py`, `src/outreach_export.py`
 - Reporting: `src/reporting.py`
 - GitHub validation workflow: `.github/workflows/validate.yml`
 
@@ -35,10 +38,14 @@ It is not production-ready.
 - Claim permission and CI checks
 - Data contract checks
 - Audit lineage checks
+- Four synthetic end-to-end reference cases
+- Experiment design and run-bound approval checks
+- Unicode injection and internally inconsistent CI checks
+- Deleted and expired subject outreach checks
 
 ## Connected
 
-- `run_analysis()` connects security, PII pseudonymization, data readiness, hypotheses, uncertainty, policy, result quality, audit lineage and reporting.
+- `run_analysis()` connects security, PII pseudonymization, data readiness, hypotheses, uncertainty, experiment design, policy, structured approval, result quality, audit lineage and reporting.
 - `POST /analyze` calls the guarded analysis service.
 - The dashboard can load existing Decision Reports or send `customer_rows` payloads to the local API.
 
@@ -46,8 +53,8 @@ It is not production-ready.
 
 - A real pilot data contract must be agreed for the first customer/use case.
 - Dashboard live run should be tested manually with representative local payloads.
-- Human approval workflow is still lightweight and config-based.
-- Experiment design assistant is not yet a complete runtime layer.
+- Human approval is structured and run-bound locally, but has no authenticated user or persistent workflow service.
+- Experiment Design Assistant v1 creates measurement plans, but power/sample-size calculation still requires a validated domain configuration.
 
 ## Blocked Before Production
 
@@ -61,4 +68,3 @@ It is not production-ready.
 - Incident response process
 - Legal/privacy review
 - Production data processing agreement
-

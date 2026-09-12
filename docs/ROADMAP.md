@@ -5,8 +5,10 @@
 - Keep the documentation and code in sync.
 - Run the local API smoke test after meaningful API changes.
 - Validate dashboard live upload with representative local payloads.
-- Add a complete experiment design assistant for cases where evidence is insufficient.
+- Extend Experiment Design Assistant v1 with domain-configured power and sample-size calculation.
 - Expand data contracts beyond activation.
+- Validate governed outreach export with approved local candidates.
+- Persist structured approvals and audit events before a real pilot.
 
 ## Before Pilot
 
@@ -16,6 +18,7 @@
 - Document the human approver for high-risk or governance-sensitive outputs.
 - Confirm that reports never expose direct PII.
 - Confirm that result quality and claim permission are visible in the dashboard.
+- Confirm that approved outreach exports can resolve operational IDs without exposing raw PII in reports.
 
 ## Before Enterprise Pilot
 
@@ -44,4 +47,3 @@
 - Loss framing automation
 - Social proof automation without reference-group validation
 - Unrestricted LLM chat over customer data
-

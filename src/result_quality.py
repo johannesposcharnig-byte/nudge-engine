@@ -15,6 +15,7 @@ class ResultQuality:
     claim_permission: dict[str, Any]
     pilot_readiness: str
     trust_warnings: list[str]
+    approval: dict[str, Any]
 
     def as_dict(self) -> dict[str, Any]:
         return {
@@ -23,6 +24,7 @@ class ResultQuality:
             "claim_permission": dict(self.claim_permission),
             "pilot_readiness": self.pilot_readiness,
             "trust_warnings": list(self.trust_warnings),
+            "approval": dict(self.approval),
         }
 
 
@@ -34,7 +36,11 @@ def evaluate_result_quality(
     privacy_safe: bool,
     policy_decisions: list[dict[str, Any]],
     human_approved: bool = False,
+    approval_decision: dict[str, Any] | None = None,
 ) -> ResultQuality:
+    approval_decision = dict(approval_decision or {})
+    structured_approval = approval_decision.get("valid") is True
+    human_approved = structured_approval or human_approved
     high_risk_or_review_required = any(
         decision.get("selected_result", {}).get("method_evaluation", {}).get("human_review_required")
         or decision.get("selected_result", {}).get("method_evaluation", {}).get("risk_tier") == "high"
@@ -62,6 +68,8 @@ def evaluate_result_quality(
         warnings.append("security_not_approved")
     if not privacy_safe:
         warnings.append("privacy_not_safe")
+    if approval_decision and not structured_approval:
+        warnings.extend(approval_decision.get("blockers", ["approval_invalid"]))
 
     pilot_readiness = "pilot_candidate" if decision_state["state"] == "pilot_candidate" else "not_ready"
     if decision_state["state"] == "pilot_approved":
@@ -73,4 +81,5 @@ def evaluate_result_quality(
         claim_permission=claim_permission,
         pilot_readiness=pilot_readiness,
         trust_warnings=sorted(set(warnings)),
+        approval=approval_decision,
     )

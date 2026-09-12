@@ -30,6 +30,18 @@ Raw rows are transformed into:
 
 Reports and dashboards should expose `subject_id`, not raw user IDs, emails, phone numbers or customer IDs.
 
+## Re-Identification And Outreach
+
+The engine may produce nudge candidates for `subject_id`, but operational outreach must happen through a governed export flow.
+
+Rules:
+
+- Re-identification requires actor, reason and explicit approval.
+- Every re-identification attempt is audited.
+- Deleted or expired subjects cannot be resolved.
+- The dashboard should not display raw identity in v1.
+- Outreach exports default to pseudonymous IDs and only include resolved IDs after approval.
+
 ## Git Safety
 
 Do not commit:
@@ -56,4 +68,3 @@ Still required before production:
 - monitoring
 - incident process
 - legal/privacy review
-

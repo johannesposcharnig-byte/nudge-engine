@@ -56,6 +56,7 @@ Minimum request shape:
   "confidence_level": 0.95,
   "config": {
     "outcome_variable": "activation_score",
+    "measurement_window": "14_days",
     "actions": ["no_action", "cognitive_ease", "simplification"]
   },
   "customer_rows": []
@@ -71,6 +72,8 @@ Expected response sections:
 - `segment_view`
 - `security_and_governance`
 - `result_quality`
+- `experiment_design`
+- `approval`
 - `audit_lineage`
 - `next_actions`
 
@@ -89,6 +92,10 @@ Errors are returned as JSON:
 
 The API should not expose raw tracebacks in responses.
 
+## Structured Approval
+
+An approval is optional for analysis and required for approved pilot/outreach operations. It is supplied under `config.approval_context` and must include status, actor, reason, timestamp, approved scopes and a `linked_run_id` matching `config.run_id`. A plain approval flag is not accepted by the analysis runtime.
+
 ## Local Limits
 
 - Local-only host: `127.0.0.1`
@@ -98,4 +105,3 @@ The API should not expose raw tracebacks in responses.
 - No production vault
 - No persistent audit store
 - No production monitoring
-

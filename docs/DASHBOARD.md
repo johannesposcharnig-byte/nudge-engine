@@ -24,6 +24,8 @@ dashboard/index.html
 - Human review requirement
 - Security and privacy system checks
 - Audit Lineage
+- Experiment Design and measurement blockers
+- Structured approval status and scope
 - Next actions
 - Local report-grounded chat preview
 
@@ -57,6 +59,8 @@ It should show:
 - whether significance is blocked
 - whether human review is required
 - whether no-action is selected for safety reasons
+- whether an experiment plan is a next step rather than evidence of effect
+- whether approval is absent, rejected or bound to the current run
 
 ## Known Limits
 
@@ -65,4 +69,3 @@ It should show:
 - No persistent user sessions
 - Local preview only
 - Chat is rule-based and report-grounded, not an unrestricted LLM assistant
-

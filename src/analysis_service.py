@@ -11,7 +11,8 @@ from dataclasses import dataclass, field
 from typing import Any
 
 from .agents.base import AgentMessage
-from .audit_lineage import build_audit_lineage
+from .approval import evaluate_approval
+from .audit_lineage import build_audit_lineage, new_run_id
 from .claim_permissions import evaluate_claim_permission
 from .data_contracts import evaluate_activation_data_contract
 from .evidence import (
@@ -20,6 +21,7 @@ from .evidence import (
     customer_data_missing_fields,
     infer_customer_data_profile,
 )
+from .experiment_design import build_experiment_design
 from .orchestrator import Orchestrator, Task
 from .pii_vault import (
     IDENTITY_FIELD_NAMES,
@@ -55,6 +57,7 @@ def run_analysis(request: AnalysisRequest | dict[str, Any]) -> dict[str, Any]:
     """Run a guarded analysis pipeline and return a dashboard-ready report."""
 
     parsed = _coerce_request(request)
+    run_id = str(parsed.config.get("run_id") or new_run_id())
     raw_security = leonidas_security_review(
         {
             "external_content": parsed.question,
@@ -155,20 +158,37 @@ def run_analysis(request: AnalysisRequest | dict[str, Any]) -> dict[str, Any]:
     final_result = formula_result or _with_uncertainty(intake_result, uncertainty)
 
     policy_decisions = _policy_decisions(analytics_rows, parsed.config)
+    experiment_design = build_experiment_design(
+        data_readiness=data_readiness,
+        context=context,
+        hypotheses=hypotheses,
+        uncertainty=uncertainty,
+        confidence_level=parsed.confidence_level,
+        config=parsed.config,
+    )
+    preapproval_blockers = _preapproval_blockers(data_readiness, analytics_security.as_dict())
+    approval_decision = evaluate_approval(
+        parsed.config.get("approval_context"),
+        required_scope="pilot_review",
+        linked_run_id=run_id,
+        active_blockers=preapproval_blockers,
+    ).as_dict()
     result_quality = evaluate_result_quality(
         data_readiness=data_readiness,
         claim_permission=claim_permission,
         security_review=analytics_security.as_dict(),
         privacy_safe=analytics_rows_are_pii_safe(analytics_rows),
         policy_decisions=policy_decisions,
-        human_approved=bool(parsed.config.get("human_approved")),
+        approval_decision=approval_decision,
     ).as_dict()
     audit_lineage = build_audit_lineage(
         rows=analytics_rows,
         data_readiness=data_readiness,
         result_quality=result_quality,
         security_review=analytics_security.as_dict(),
-        human_override_status="approved" if parsed.config.get("human_approved") else "none",
+        human_override_status="approved" if approval_decision.get("valid") else "none",
+        run_id=run_id,
+        approval_decision=approval_decision,
     )
     next_actions = _next_actions(final_result, uncertainty, policy_decisions)
     return build_decision_report(
@@ -184,8 +204,24 @@ def run_analysis(request: AnalysisRequest | dict[str, Any]) -> dict[str, Any]:
             next_actions=next_actions,
             result_quality=result_quality,
             audit_lineage=audit_lineage,
+            experiment_design=experiment_design,
+            approval=approval_decision,
         )
     )
+
+
+def _preapproval_blockers(
+    data_readiness: dict[str, Any], security_review: dict[str, Any]
+) -> list[str]:
+    blockers: list[str] = []
+    security_status = security_review.get("security_status")
+    if security_status in {"reject", "blocked"}:
+        blockers.append("security_blocked")
+    elif security_status == "hold":
+        blockers.append("security_hold")
+    if data_readiness.get("status") == "reject":
+        blockers.append("data_contract_rejected")
+    return blockers
 
 
 def _coerce_request(request: AnalysisRequest | dict[str, Any]) -> AnalysisRequest:
